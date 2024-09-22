@@ -21,7 +21,7 @@ Tools Used:
 - Oracle SQL Developer
 
 
-###Part 3
+### Part 3
 Performed queries to analyze the data contained in the previously generated tables.
 
 Tools Used:
