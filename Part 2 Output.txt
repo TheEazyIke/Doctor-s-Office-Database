@@ -1,0 +1,1060 @@
+SQL> 
+SQL> DROP TABLE APPTDETAIL_ilw ;
+
+Table APPTDETAIL_ILW dropped.
+
+SQL> DROP TABLE APPOINTMENT_ilw ;
+
+Table APPOINTMENT_ILW dropped.
+
+SQL> DROP TABLE TREATMENT_ilw ;
+
+Table TREATMENT_ILW dropped.
+
+SQL> DROP TABLE BLOCKCODE_ilw ;
+
+Table BLOCKCODE_ILW dropped.
+
+SQL> DROP TABLE PATIENT_ilw ;
+
+Table PATIENT_ILW dropped.
+
+SQL> DROP TABLE BILLINGTYPE_ilw ;
+
+Table BILLINGTYPE_ILW dropped.
+
+SQL> DROP TABLE INSURANCECO_ilw ;
+
+Table INSURANCECO_ILW dropped.
+
+SQL> DROP TABLE PROVIDER_ilw ;
+
+Table PROVIDER_ILW dropped.
+
+SQL> DROP TABLE APPTSTATUS_ilw ;
+
+Table APPTSTATUS_ILW dropped.
+
+SQL> DROP TABLE PMTSTATUS_ilw ;
+
+Table PMTSTATUS_ILW dropped.
+
+SQL> 
+SQL> --Part 1A
+SQL> 
+SQL> CREATE TABLE PMTSTATUS_ilw(
+  2  PmtStatus	char(2),
+  3  PmtDesc		varchar(15) NOT NULL,
+  4  PRIMARY KEY (PmtStatus)
+  5  ) ;
+
+Table PMTSTATUS_ILW created.
+
+SQL> CREATE TABLE APPTSTATUS_ilw(
+  2  ApptStatusCode		char(2),
+  3  ApptStatusDesc		varchar(15)	NOT NULL,
+  4  PRIMARY KEY (ApptStatusCode)	
+  5  ) ;
+
+Table APPTSTATUS_ILW created.
+
+SQL> CREATE TABLE PROVIDER_ilw(
+  2  ProviderID	number(2),
+  3  ProviderFName	varchar(15)	NOT NULL,
+  4  ProviderLName	varchar(15)	NOT NULL,
+  5  PRIMARY KEY (ProviderID)
+  6  ) ;
+
+Table PROVIDER_ILW created.
+
+SQL> CREATE TABLE INSURANCECO_ilw(
+  2  InsCoID		number(3),
+  3  InsCoName	varchar(20),
+  4  PRIMARY KEY (InsCoID)
+  5  ) ;
+
+Table INSURANCECO_ILW created.
+
+SQL> CREATE TABLE BILLINGTYPE_ilw(
+  2  BillingType	varchar(2),
+  3  BillingTypeDesc	varchar(15)	NOT NULL,
+  4  PRIMARY KEY (BillingType)
+  5  ) ;
+
+Table BILLINGTYPE_ILW created.
+
+SQL> CREATE TABLE PATIENT_ilw(
+  2  PatientID	number(4),
+  3  PatientFName	varchar(15)	NOT NULL,
+  4  PatientLName	varchar(15)	NOT NULL,
+  5  PatientPhone	char(10),
+  6  PRIMARY KEY (PatientID)
+  7  ) ;
+
+Table PATIENT_ILW created.
+
+SQL> CREATE TABLE BLOCKCODE_ilw(
+  2  BlockCode	varchar(3),
+  3  BlockDesc	varchar(9)	NOT NULL,
+  4  BlockMinutes	number(3)	NOT NULL,
+  5  PRIMARY KEY (BlockCode)
+  6  ) ;
+
+Table BLOCKCODE_ILW created.
+
+SQL> CREATE TABLE TREATMENT_ilw(
+  2  TreatmentCode	varchar(5),
+  3  TreatmentDesc	varchar(25)	NOT NULL,
+  4  TreatmentRate	number(6,2)	NOT NULL,
+  5  BlockCode	varchar(3)	NOT NULL,
+  6  PRIMARY KEY (TreatmentCode),
+  7  FOREIGN KEY (BlockCode) REFERENCES BLOCKCODE_ilw
+  8  ) ;
+
+Table TREATMENT_ILW created.
+
+SQL> CREATE TABLE APPOINTMENT_ilw(
+  2  ApptID		number(4),
+  3  ApptDateTime	date		NOT NULL,
+  4  PatientID	number(4)	NOT NULL,	
+  5  BillingType	varchar(2)	NOT NULL,
+  6  InsCoID		number(3),
+  7  ProvID		number(2)	NOT NULL,
+  8  ApptStatusCode	char(2)		NOT NULL,
+  9  PmtStatus	char(2)		NOT NULL,
+ 10  PRIMARY KEY (ApptID),
+ 11  FOREIGN KEY (PatientID) REFERENCES PATIENT_ilw,
+ 12  FOREIGN KEY (BillingType) REFERENCES BILLINGTYPE_ilw,
+ 13  FOREIGN KEY (InsCoID) REFERENCES INSURANCECO_ilw,
+ 14  FOREIGN KEY (ProvID) REFERENCES PROVIDER_ilw,
+ 15  FOREIGN KEY (ApptStatusCode) REFERENCES APPTSTATUS_ilw,
+ 16  FOREIGN KEY (PmtStatus) REFERENCES PMTSTATUS_ilw
+ 17  ) ;
+
+Table APPOINTMENT_ILW created.
+
+SQL> CREATE TABLE APPTDETAIL_ilw(
+  2  ApptID		number(4)	NOT NULL,
+  3  TreatmentCode	varchar(5)	NOT NULL,
+  4  PRIMARY KEY (ApptID, TreatmentCode),
+  5  FOREIGN KEY (ApptID) REFERENCES APPOINTMENT_ilw,
+  6  FOREIGN KEY (TreatmentCode) REFERENCES TREATMENT_ilw
+  7  ) ;
+
+Table APPTDETAIL_ILW created.
+
+SQL> 
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> 
+SQL> 
+SQL> --Part 1B
+SQL> 
+SQL> DESCRIBE APPTDETAIL_ilw 
+Name          Null?    Type        
+------------- -------- ----------- 
+APPTID        NOT NULL NUMBER(4)   
+TREATMENTCODE NOT NULL VARCHAR2(5) 
+SQL> DESCRIBE APPOINTMENT_ilw 
+Name           Null?    Type        
+-------------- -------- ----------- 
+APPTID         NOT NULL NUMBER(4)   
+APPTDATETIME   NOT NULL DATE        
+PATIENTID      NOT NULL NUMBER(4)   
+BILLINGTYPE    NOT NULL VARCHAR2(2) 
+INSCOID                 NUMBER(3)   
+PROVID         NOT NULL NUMBER(2)   
+APPTSTATUSCODE NOT NULL CHAR(2)     
+PMTSTATUS      NOT NULL CHAR(2)     
+SQL> DESCRIBE TREATMENT_ilw 
+Name          Null?    Type         
+------------- -------- ------------ 
+TREATMENTCODE NOT NULL VARCHAR2(5)  
+TREATMENTDESC NOT NULL VARCHAR2(25) 
+TREATMENTRATE NOT NULL NUMBER(6,2)  
+BLOCKCODE     NOT NULL VARCHAR2(3)  
+SQL> DESCRIBE BLOCKCODE_ilw 
+Name         Null?    Type        
+------------ -------- ----------- 
+BLOCKCODE    NOT NULL VARCHAR2(3) 
+BLOCKDESC    NOT NULL VARCHAR2(9) 
+BLOCKMINUTES NOT NULL NUMBER(3)   
+SQL> DESCRIBE PATIENT_ilw 
+Name         Null?    Type         
+------------ -------- ------------ 
+PATIENTID    NOT NULL NUMBER(4)    
+PATIENTFNAME NOT NULL VARCHAR2(15) 
+PATIENTLNAME NOT NULL VARCHAR2(15) 
+PATIENTPHONE          CHAR(10)     
+SQL> DESCRIBE BILLINGTYPE_ilw 
+Name            Null?    Type         
+--------------- -------- ------------ 
+BILLINGTYPE     NOT NULL VARCHAR2(2)  
+BILLINGTYPEDESC NOT NULL VARCHAR2(15) 
+SQL> DESCRIBE INSURANCECO_ilw 
+Name      Null?    Type         
+--------- -------- ------------ 
+INSCOID   NOT NULL NUMBER(3)    
+INSCONAME          VARCHAR2(20) 
+SQL> DESCRIBE PROVIDER_ilw 
+Name          Null?    Type         
+------------- -------- ------------ 
+PROVIDERID    NOT NULL NUMBER(2)    
+PROVIDERFNAME NOT NULL VARCHAR2(15) 
+PROVIDERLNAME NOT NULL VARCHAR2(15) 
+SQL> DESCRIBE APPTSTATUS_ilw 
+Name           Null?    Type         
+-------------- -------- ------------ 
+APPTSTATUSCODE NOT NULL CHAR(2)      
+APPTSTATUSDESC NOT NULL VARCHAR2(15) 
+SQL> DESCRIBE PMTSTATUS_ilw 
+Name      Null?    Type         
+--------- -------- ------------ 
+PMTSTATUS NOT NULL CHAR(2)      
+PMTDESC   NOT NULL VARCHAR2(15) 
+SQL> 
+SQL> 
+SQL> --2A
+SQL> 
+SQL> --PATIENT
+SQL> --PatientID, PatientFName, PatientLName, PatientPhone
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (101, 'Wesley', 'Tanner', '8175551193');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (100, 'Brenda', 'Rhodes', '2145559191');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (15, 'Jeff', 'Miner', '4695552301');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (77, 'Kim', 'Jackson', '8175554911');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (119, 'Mary', 'Vaughn', '8175552334');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (97, 'Chris', 'Mancha', '4695553440');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (28, 'Renee', 'Walker', '2145559285');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (105, 'Johnny', 'Redmond', '2145551084');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (84, 'James', 'Clayton', '2145559285');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (23, 'Shelby', 'Davis', '8175551198');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --BILLINGTYPE
+SQL> --BillingType, BillingTypeDesc
+SQL> 
+SQL> INSERT INTO BillingType_ilw
+  2  VALUES ('I', 'Insurance');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO BillingType_ilw
+  2  VALUES ('SP', 'Self-Pay');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO BillingType_ilw
+  2  VALUES ('WC', 'Worker''s Comp');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --INSURANCECO
+SQL> --InsCoID, InsCoName
+SQL> 
+SQL> INSERT INTO INSURANCECO_ilw
+  2  VALUES (323, 'Humana');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO INSURANCECO_ilw
+  2  VALUES (129, 'Blue Cross');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO INSURANCECO_ilw
+  2  VALUES (210, 'State Farm');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO INSURANCECO_ilw
+  2  VALUES (135, 'TriCare');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --PROVIDER
+SQL> --ProvID, ProvFName, ProvLName
+SQL> 
+SQL> INSERT INTO PROVIDER_ilw
+  2  VALUES (2, 'Michael', 'Smith');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PROVIDER_ilw
+  2  VALUES (5, 'Janice', 'May');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PROVIDER_ilw
+  2  VALUES (1, 'Kay', 'Jones');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PROVIDER_ilw
+  2  VALUES (3, 'Ray', 'Schultz');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --APPTSTATUS
+SQL> --ApptStatusCode, ApptStatusDesc
+SQL> 
+SQL> INSERT INTO APPTSTATUS_ilw
+  2  VALUES ('CM', 'Complete');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTSTATUS_ilw
+  2  VALUES ('CN', 'Confirmed');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTSTATUS_ilw
+  2  VALUES ('NC', 'Not Confirmed');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --PMTSTATUS
+SQL> --PmtStatus, PmtDesc
+SQL> 
+SQL> INSERT INTO PMTSTATUS_ilw
+  2  VALUES ('PD', 'Paid in Full');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PMTSTATUS_ilw
+  2  VALUES ('PP', 'Partial Payment');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO PMTSTATUS_ilw
+  2  VALUES ('NP', 'Not Paid');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --BLOCKCODE
+SQL> --BlockCode, BlockDesc, BlockMinutes
+SQL> 
+SQL> INSERT INTO BLOCKCODE_ilw
+  2  VALUES ('L1', 'Level 1', 15);
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO BLOCKCODE_ilw
+  2  VALUES ('L2', 'Level 2', 20);
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO BLOCKCODE_ilw
+  2  VALUES ('L3', 'Level 3', 30);
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO BLOCKCODE_ilw
+  2  VALUES ('L4', 'Level 4', 60);
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --TREATMENT
+SQL> --TreatmentCode, TreatmentDesc, TreatmentRate, BlockCode
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('NP', 'New Patient', 45, 'L1');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('GBP', 'General Back Pain', 60, 'L2');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('XR', 'X-Ray', 250, 'L2');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('PSF', 'Post-Surgery Follow Up', 30, 'L1');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('SR', 'Suture Removal', 50, 'L2');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('PT30', 'Physical Therapy 30', 60, 'L3');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('BI', 'Back Injury', 60, 'L2');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('PT60', 'Physical Therapy 60', 110, 'L4');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('HP', 'Hip Pain', 60, 'L2');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --APPOINTMENT
+SQL> --APPTID, APPTDATETIME, PATIENTID, BILLINGTYPE, INSCOID, PROVID, APPTSTATUSCODE, PMTSTATUS
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (101, TO_DATE('2/19/24 9:00AM', 'MM/DD/YY HH:MIAM'), 101, 'I', 323, 2, 'CM', 'PD');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (102, TO_DATE('2/19/24 9:00AM', 'MM/DD/YY HH:MIAM'), 100, 'I', 129, 5, 'CM', 'PP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (103, TO_DATE('2/19/24 10:00AM', 'MM/DD/YY HH:MIAM'), 15, 'SP', NULL, 2, 'CM', 'PD');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (104, TO_DATE('2/19/24 10:30AM', 'MM/DD/YY HH:MIAM'), 77, 'WC', 210, 1, 'CM', 'PD');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (105, TO_DATE('2/19/24 10:30AM', 'MM/DD/YY HH:MIAM'), 119, 'I', 129, 2, 'CM', 'PP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (106, TO_DATE('2/19/24 10:30AM', 'MM/DD/YY HH:MIAM'), 97, 'SP', NULL, 3, 'CM', 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (107, TO_DATE('2/19/24 11:30AM', 'MM/DD/YY HH:MIAM'), 28, 'I', 129, 3, 'CN', 'PP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (108, TO_DATE('2/19/24 11:30AM', 'MM/DD/YY HH:MIAM'), 105, 'I', 323, 2, 'CN', 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (109, TO_DATE('2/19/24 2:00PM', 'MM/DD/YY HH:MIPM'), 84, 'I', 135, 5, 'CN', 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (110, TO_DATE('2/20/24 8:30AM', 'MM/DD/YY HH:MIAM'), 84, 'I', 135, 3, 'NC', 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (111, TO_DATE('2/20/24 8:30AM', 'MM/DD/YY HH:MIAM'), 23, 'WC', 323, 5, 'CN', 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> --APPTDETAIL
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (101, 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (101, 'GBP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (101, 'XR');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (102, 'PSF');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (102, 'SR');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (103, 'PSF');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (103, 'SR');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (104, 'PT30');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (105, 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (105, 'BI');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (106, 'PT60');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (107, 'PT30');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (108, 'GBP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (109, 'PSF');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (109, 'SR');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (110, 'PT60');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (111, 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (111, 'HP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (111, 'XR');
+
+1 row inserted.
+
+SQL> 
+SQL> COMMIT ;
+
+Commit complete.
+
+SQL> 
+SQL> --Part 2B
+SQL> 
+SQL> SELECT * FROM APPTDETAIL_ilw ;
+
+    APPTID TREAT
+---------- -----
+       101 GBP  
+       101 NP   
+       101 XR   
+       102 PSF  
+       102 SR   
+       103 PSF  
+       103 SR   
+       104 PT30 
+       105 BI   
+       105 NP   
+       106 PT60 
+
+    APPTID TREAT
+---------- -----
+       107 PT30 
+       108 GBP  
+       109 PSF  
+       109 SR   
+       110 PT60 
+       111 HP   
+       111 NP   
+       111 XR   
+
+19 rows selected. 
+
+SQL> SELECT * FROM APPOINTMENT_ilw ;
+
+    APPTID APPTDATET  PATIENTID BI    INSCOID     PROVID AP PM
+---------- --------- ---------- -- ---------- ---------- -- --
+       101 19-FEB-24        101 I         323          2 CM PD
+       102 19-FEB-24        100 I         129          5 CM PP
+       103 19-FEB-24         15 SP                     2 CM PD
+       104 19-FEB-24         77 WC        210          1 CM PD
+       105 19-FEB-24        119 I         129          2 CM PP
+       106 19-FEB-24         97 SP                     3 CM NP
+       107 19-FEB-24         28 I         129          3 CN PP
+       108 19-FEB-24        105 I         323          2 CN NP
+       109 19-FEB-24         84 I         135          5 CN NP
+       110 20-FEB-24         84 I         135          3 NC NP
+       111 20-FEB-24         23 WC        323          5 CN NP
+
+11 rows selected. 
+
+SQL> SELECT * FROM TREATMENT_ilw ;
+
+TREAT TREATMENTDESC             TREATMENTRATE BLO
+----- ------------------------- ------------- ---
+NP    New Patient                          45 L1 
+GBP   General Back Pain                    60 L2 
+XR    X-Ray                               250 L2 
+PSF   Post-Surgery Follow Up               30 L1 
+SR    Suture Removal                       50 L2 
+PT30  Physical Therapy 30                  60 L3 
+BI    Back Injury                          60 L2 
+PT60  Physical Therapy 60                 110 L4 
+HP    Hip Pain                             60 L2 
+
+9 rows selected. 
+
+SQL> SELECT * FROM BLOCKCODE_ilw ;
+
+BLO BLOCKDESC BLOCKMINUTES
+--- --------- ------------
+L1  Level 1             15
+L2  Level 2             20
+L3  Level 3             30
+L4  Level 4             60
+
+SQL> SELECT * FROM PATIENT_ilw ;
+
+ PATIENTID PATIENTFNAME    PATIENTLNAME    PATIENTPHO
+---------- --------------- --------------- ----------
+       101 Wesley          Tanner          8175551193
+       100 Brenda          Rhodes          2145559191
+        15 Jeff            Miner           4695552301
+        77 Kim             Jackson         8175554911
+       119 Mary            Vaughn          8175552334
+        97 Chris           Mancha          4695553440
+        28 Renee           Walker          2145559285
+       105 Johnny          Redmond         2145551084
+        84 James           Clayton         2145559285
+        23 Shelby          Davis           8175551198
+
+10 rows selected. 
+
+SQL> SELECT * FROM BILLINGTYPE_ilw ;
+
+BI BILLINGTYPEDESC
+-- ---------------
+I  Insurance      
+SP Self-Pay       
+WC Worker's Comp  
+
+SQL> SELECT * FROM INSURANCECO_ilw ;
+
+   INSCOID INSCONAME           
+---------- --------------------
+       323 Humana              
+       129 Blue Cross          
+       210 State Farm          
+       135 TriCare             
+
+SQL> SELECT * FROM PROVIDER_ilw ;
+
+PROVIDERID PROVIDERFNAME   PROVIDERLNAME  
+---------- --------------- ---------------
+         2 Michael         Smith          
+         5 Janice          May            
+         1 Kay             Jones          
+         3 Ray             Schultz        
+
+SQL> SELECT * FROM APPTSTATUS_ilw ;
+
+AP APPTSTATUSDESC 
+-- ---------------
+CM Complete       
+CN Confirmed      
+NC Not Confirmed  
+
+SQL> SELECT * FROM PMTSTATUS_ilw ;
+
+PM PMTDESC        
+-- ---------------
+PD Paid in Full   
+PP Partial Payment
+NP Not Paid       
+
+SQL> 
+SQL> 
+SQL> --Part 3
+SQL> 
+SQL> UPDATE PATIENT_ilw
+  2  SET PatientPhone = '2145551234'
+  3  WHERE PatientID = 100;
+
+1 row updated.
+
+SQL> 
+SQL> INSERT INTO PATIENT_ilw
+  2  VALUES (120, 'Amanda', 'Green', NULL);
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('CI1', 'Cortizone Injection 1', 50, 'L1');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO TREATMENT_ilw
+  2  VALUES ('CI2', 'Cortizone Injection 2', 100, 'L1');
+
+1 row inserted.
+
+SQL> 
+SQL> 
+SQL> UPDATE APPOINTMENT_ilw
+  2  SET ApptDateTime = TO_DATE('2/21/2024 11:30AM', 'MM/DD/YYYY HH:MIAM')
+  3  WHERE ApptID = 108;
+
+1 row updated.
+
+SQL> 
+SQL> UPDATE APPOINTMENT_ilw
+  2  SET BillingType = 'WC'
+  3  WHERE ApptID = 107;
+
+1 row updated.
+
+SQL> 
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES (112, TO_DATE('2/21/24 9:00AM', 'MM/DD/YY HH:MIAM'), 120, 'SP', NULL, 2, 'NC', 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (112, 'NP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (112, 'HP');
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES (112, 'CI2');
+
+1 row inserted.
+
+SQL> 
+SQL> UPDATE APPTDETAIL_ilw
+  2  SET TreatmentCode = 'GBP'
+  3  WHERE TreatmentCode = 'BI' and ApptID = 105;
+
+1 row updated.
+
+SQL> 
+SQL> COMMIT ;
+
+Commit complete.
+
+SQL> 
+SQL> 
+SQL> --Part 4
+SQL> 
+SQL> SELECT * FROM APPTDETAIL_ilw 
+  2  ORDER BY ApptID, TreatmentCode ;
+
+    APPTID TREAT
+---------- -----
+       101 GBP  
+       101 NP   
+       101 XR   
+       102 PSF  
+       102 SR   
+       103 PSF  
+       103 SR   
+       104 PT30 
+       105 GBP  
+       105 NP   
+       106 PT60 
+
+    APPTID TREAT
+---------- -----
+       107 PT30 
+       108 GBP  
+       109 PSF  
+       109 SR   
+       110 PT60 
+       111 HP   
+       111 NP   
+       111 XR   
+       112 CI2  
+       112 HP   
+       112 NP   
+
+22 rows selected. 
+
+SQL> 
+SQL> SELECT * FROM APPOINTMENT_ilw 
+  2  ORDER BY ApptID ;
+
+    APPTID APPTDATET  PATIENTID BI    INSCOID     PROVID AP PM
+---------- --------- ---------- -- ---------- ---------- -- --
+       101 19-FEB-24        101 I         323          2 CM PD
+       102 19-FEB-24        100 I         129          5 CM PP
+       103 19-FEB-24         15 SP                     2 CM PD
+       104 19-FEB-24         77 WC        210          1 CM PD
+       105 19-FEB-24        119 I         129          2 CM PP
+       106 19-FEB-24         97 SP                     3 CM NP
+       107 19-FEB-24         28 WC        129          3 CN PP
+       108 21-FEB-24        105 I         323          2 CN NP
+       109 19-FEB-24         84 I         135          5 CN NP
+       110 20-FEB-24         84 I         135          3 NC NP
+       111 20-FEB-24         23 WC        323          5 CN NP
+
+    APPTID APPTDATET  PATIENTID BI    INSCOID     PROVID AP PM
+---------- --------- ---------- -- ---------- ---------- -- --
+       112 21-FEB-24        120 SP                     2 NC NP
+
+12 rows selected. 
+
+SQL> 
+SQL> SELECT * FROM TREATMENT_ilw 
+  2  ORDER BY TreatmentCode;
+
+TREAT TREATMENTDESC             TREATMENTRATE BLO
+----- ------------------------- ------------- ---
+BI    Back Injury                          60 L2 
+CI1   Cortizone Injection 1                50 L1 
+CI2   Cortizone Injection 2               100 L1 
+GBP   General Back Pain                    60 L2 
+HP    Hip Pain                             60 L2 
+NP    New Patient                          45 L1 
+PSF   Post-Surgery Follow Up               30 L1 
+PT30  Physical Therapy 30                  60 L3 
+PT60  Physical Therapy 60                 110 L4 
+SR    Suture Removal                       50 L2 
+XR    X-Ray                               250 L2 
+
+11 rows selected. 
+
+SQL> 
+SQL> SELECT * FROM BLOCKCODE_ilw 
+  2  ORDER BY BlockCode ;
+
+BLO BLOCKDESC BLOCKMINUTES
+--- --------- ------------
+L1  Level 1             15
+L2  Level 2             20
+L3  Level 3             30
+L4  Level 4             60
+
+SQL> 
+SQL> SELECT * FROM PATIENT_ilw 
+  2  ORDER BY PatientID ;
+
+ PATIENTID PATIENTFNAME    PATIENTLNAME    PATIENTPHO
+---------- --------------- --------------- ----------
+        15 Jeff            Miner           4695552301
+        23 Shelby          Davis           8175551198
+        28 Renee           Walker          2145559285
+        77 Kim             Jackson         8175554911
+        84 James           Clayton         2145559285
+        97 Chris           Mancha          4695553440
+       100 Brenda          Rhodes          2145551234
+       101 Wesley          Tanner          8175551193
+       105 Johnny          Redmond         2145551084
+       119 Mary            Vaughn          8175552334
+       120 Amanda          Green                     
+
+11 rows selected. 
+
+SQL> 
+SQL> SELECT * FROM BILLINGTYPE_ilw 
+  2  ORDER BY BillingType ;
+
+BI BILLINGTYPEDESC
+-- ---------------
+I  Insurance      
+SP Self-Pay       
+WC Worker's Comp  
+
+SQL> 
+SQL> SELECT * FROM INSURANCECO_ilw 
+  2  ORDER BY InsCoID ;
+
+   INSCOID INSCONAME           
+---------- --------------------
+       129 Blue Cross          
+       135 TriCare             
+       210 State Farm          
+       323 Humana              
+
+SQL> 
+SQL> SELECT * FROM PROVIDER_ilw 
+  2  ORDER BY ProviderID ;
+
+PROVIDERID PROVIDERFNAME   PROVIDERLNAME  
+---------- --------------- ---------------
+         1 Kay             Jones          
+         2 Michael         Smith          
+         3 Ray             Schultz        
+         5 Janice          May            
+
+SQL> 
+SQL> SELECT * FROM APPTSTATUS_ilw 
+  2  ORDER BY ApptStatusCode ;
+
+AP APPTSTATUSDESC 
+-- ---------------
+CM Complete       
+CN Confirmed      
+NC Not Confirmed  
+
+SQL> 
+SQL> SELECT * FROM PMTSTATUS_ilw 
+  2  ORDER BY PmtStatus;
+
+PM PMTDESC        
+-- ---------------
+NP Not Paid       
+PD Paid in Full   
+PP Partial Payment
+
+SQL> 
+SQL> set echo off

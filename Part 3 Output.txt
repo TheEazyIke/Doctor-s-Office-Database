@@ -1,0 +1,564 @@
+SQL> 
+SQL> --Part II
+SQL> 
+SQL> --1
+SQL> ALTER SESSION SET nls_date_format='MM/DD/YYYY HH12:MI AM';
+
+Session altered.
+
+SQL> 
+SQL> --2
+SQL> COLUMN PmtStatus FORMAT a10
+SQL> COLUMN PmtDesc FORMAT a8
+SQL> COLUMN ApptStatusCode FORMAT a16
+SQL> COLUMN ApptStatusDesc FORMAT a16
+SQL> COLUMN ProviderFName FORMAT a14
+SQL> COLUMN ProviderLName FORMAT a14
+SQL> COLUMN InsCoName FORMAT a11
+SQL> COLUMN BillingType FORMAT a12
+SQL> COLUMN BillingTypeDesc FORMAT a17
+SQL> COLUMN BlockCode FORMAT a10
+SQL> COLUMN BlockDesc FORMAT a10
+SQL> COLUMN PatientFName FORMAT a13
+SQL> COLUMN PatientLName FORMAT a13
+SQL> COLUMN PatientPhone FORMAT a13
+SQL> COLUMN TreatmentCode FORMAT a14
+SQL> COLUMN TreatmentDesc FORMAT a14
+SQL> COLUMN "Patient Name" FORMAT a12
+SQL> COLUMN "Phone" FORMAT a5
+SQL> COLUMN "Rate" FORMAT a4
+SQL> COLUMN "Date/Time" FORMAT a9
+SQL> COLUMN "Patient" FORMAT a7
+SQL> COLUMN "Provider" FORMAT a8
+SQL> COLUMN "TreatCode" FORMAT a9
+SQL> COLUMN "TreatDesc" FORMAT a9
+SQL> COLUMN "BlockCodeDesc" FORMAT a15
+SQL> COLUMN "Minutes" FORMAT a7
+SQL> COLUMN "Treatment" FORMAT a9
+SQL> COLUMN "Description" FORMAT a11
+SQL> COLUMN "TreatmentCount" FORMAT a15
+SQL> COLUMN "Provider ID" FORMAT a11
+SQL> COLUMN "First Name" FORMAT a10
+SQL> COLUMN "Last Name" FORMAT a9
+SQL> COLUMN "Appt Count" FORMAT a10
+SQL> COLUMN "Appt Date" FORMAT a9
+SQL> COLUMN "TotalCharge" FORMAT a12
+SQL> COLUMN "Name" FORMAT a4
+SQL> COLUMN "Amt Paid" FORMAT a8
+SQL> COLUMN "Percent with Insurance" FORMAT a22
+SQL> COLUMN "Avg_Rate" FORMAT a8
+SQL> COLUMN "Date" FORMAT a4
+SQL> COLUMN "Duration" FORMAT a8
+SQL> COLUMN "Status Code" FORMAT a11
+SQL> 
+SQL> 
+SQL> --3
+SQL> SET LINESIZE 175
+SQL> 
+SQL> --4 (will be done throughout part 3)
+SQL> 
+SQL> --5
+SQL> UPDATE TREATMENT_ilw
+  2  	SET TreatmentDesc = 'Cortizone Injection 2'
+  3  	WHERE TreatmentCode = 'CI2' ;
+
+1 row updated.
+
+SQL> 
+SQL> --6
+SQL> UPDATE APPOINTMENT_ilw
+  2  	SET ApptStatusCode = 'NC'
+  3  	WHERE ApptID = 109 ;
+
+1 row updated.
+
+SQL> 
+SQL> --7
+SQL> UPDATE APPOINTMENT_ilw
+  2  	SET ApptStatusCode = 'CM', PmtStatus = 'PD'
+  3  	WHERE ApptID = 107 ;
+
+1 row updated.
+
+SQL> 
+SQL> --8
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES ((SELECT MAX(ApptID)+1 FROM APPOINTMENT_ilw), TO_DATE('02/21/24 10AM', 'MM/DD/YY HHAM'), 105, 'I', 323, 3, 'NC', 'NP') ;
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES ((SELECT MAX(ApptID) FROM APPOINTMENT_ilw), 'PT60') ;
+
+1 row inserted.
+
+SQL> 
+SQL> --9
+SQL> INSERT INTO APPOINTMENT_ilw
+  2  VALUES ((SELECT MAX(ApptID)+1 FROM APPOINTMENT_ilw), TO_DATE('02/21/24 10AM', 'MM/DD/YY HHAM'), 15, 'SP', NULL, 2, 'NC', 'NP') ;
+
+1 row inserted.
+
+SQL> 
+SQL> INSERT INTO APPTDETAIL_ilw
+  2  VALUES ((SELECT MAX(ApptID) FROM APPOINTMENT_ilw), 'PSF') ;
+
+1 row inserted.
+
+SQL> 
+SQL> --10
+SQL> UPDATE PATIENT_ilw
+  2  	SET PatientPhone = '8175558918'
+  3  	WHERE PatientID = 15 ;
+
+1 row updated.
+
+SQL> 
+SQL> --11
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> 
+SQL> 
+SQL> --Part III
+SQL> 
+SQL> --1
+SQL> SELECT PatientID as "Patient ID", (PatientFName || ' ' || PatientLName) as "Patient Name", PatientPhone as "Phone"
+  2  FROM PATIENT_ilw
+  3  ORDER BY PatientLName ASC ;
+
+Patient ID Patient Name                    Phone     
+---------- ------------------------------- ----------
+        84 James Clayton                   2145559285
+        23 Shelby Davis                    8175551198
+       120 Amanda Green                              
+        77 Kim Jackson                     8175554911
+        97 Chris Mancha                    4695553440
+        15 Jeff Miner                      8175558918
+       105 Johnny Redmond                  2145551084
+       100 Brenda Rhodes                   2145551234
+       101 Wesley Tanner                   8175551193
+       119 Mary Vaughn                     8175552334
+        28 Renee Walker                    2145559285
+
+11 rows selected. 
+
+SQL> 
+SQL> --2
+SQL> SELECT BlockCode as "Block_Code", TreatmentCode as "Treatment_Code", TreatmentDesc as "Treatment_Desc", TO_CHAR(TreatmentRate, '$9999.99') as "Rate"
+  2  FROM TREATMENT_ilw
+  3  ORDER BY BlockCode ASC, TreatmentCode ASC;
+
+Bl Trea Treatment_Desc            Rate     
+-- ---- ------------------------- ---------
+L1 CI1  Cortisone Injection 1        $50.00
+L1 CI2  Cortizone Injection 2       $100.00
+L1 NP   New Patient                  $45.00
+L1 PSF  Post-Surgery Follow Up       $30.00
+L2 BI   Back Injury                  $60.00
+L2 GBP  General Back Pain            $60.00
+L2 HP   Hip Pain                     $60.00
+L2 SR   Suture Removal               $50.00
+L2 XR   X-Ray                       $250.00
+L3 PT30 Physical Therapy 30          $60.00
+L4 PT60 Physical Therapy 60         $110.00
+
+11 rows selected. 
+
+SQL> 
+SQL> --3
+SQL> SELECT ApptID, TO_CHAR(ApptDateTime, 'MM/DD/YY, HH:MIAM') as "Date/Time", A.PatientID, PatientFName || '  ' || PatientLName as "Patient", SUBSTR(PatientPhone,1,3) ||'-'||
+  2  SUBSTR(PatientPhone,4,3) ||'-'|| SUBSTR(PatientPhone,7,4) as "Phone", ProviderFName || ' ' || ProviderLName as "Provider"
+  3  FROM APPOINTMENT_ilw A
+  4  JOIN PATIENT_ilw PA
+  5  ON A.PatientID = PA.PatientID
+  6  JOIN PROVIDER_ilw PR
+  7  ON A.ProvID = PR.ProvID
+  8  ORDER BY ApptID ASC;
+
+    APPTID Date/Time          PATIENTID Patient                          Phone        Provider                       
+---------- ----------------- ---------- -------------------------------- ------------ -------------------------------
+       101 02/19/24, 09:00AM        101 Wesley  Tanner                   817-555-1193 Michael Smith                  
+       102 02/19/24, 09:00AM        100 Brenda  Rhodes                   214-555-1234 Janice May                     
+       103 02/19/24, 10:00AM         15 Jeff  Miner                      817-555-8918 Michael Smith                  
+       104 02/19/24, 10:30AM         77 Kim  Jackson                     817-555-4911 Kay Jones                      
+       105 02/19/24, 10:30AM        119 Mary  Vaughn                     817-555-2334 Michael Smith                  
+       106 02/19/24, 10:30AM         97 Chris  Mancha                    469-555-3440 Ray Schultz                    
+       107 02/19/24, 11:30AM         28 Renee  Walker                    214-555-9285 Ray Schultz                    
+       108 02/21/24, 11:30AM        105 Johnny  Redmond                  214-555-1084 Michael Smith                  
+       109 02/19/24, 02:00PM         84 James  Clayton                   214-555-9285 Janice May                     
+       110 02/20/24, 08:30AM         84 James  Clayton                   214-555-9285 Ray Schultz                    
+       111 02/20/24, 08:30AM         23 Shelby  Davis                    817-555-1198 Janice May                     
+
+    APPTID Date/Time          PATIENTID Patient                          Phone        Provider                       
+---------- ----------------- ---------- -------------------------------- ------------ -------------------------------
+       112 02/21/24, 09:00AM        120 Amanda  Green                    --           Michael Smith                  
+       113 02/21/24, 10:00AM        105 Johnny  Redmond                  214-555-1084 Ray Schultz                    
+       114 02/21/24, 10:00AM         15 Jeff  Miner                      817-555-8918 Michael Smith                  
+
+14 rows selected. 
+
+SQL> 
+SQL> --4
+SQL> SELECT ApptID, T.TreatmentCode as "TreatCode", TreatmentDesc as "TreatDesc", B.BlockCode, BlockDesc as "BlockCodeDesc", BlockMinutes as "Minutes", TreatmentRate as "Rate"
+  2  FROM APPTDETAIL_ilw A, TREATMENT_ilw T, BLOCKCODE_ilw B
+  3  WHERE B.BlockCode = T.BlockCode AND T.TreatmentCode = A.TreatmentCode AND (ApptID,TreatmentRate) in (SELECT ApptID, MAX(TreatmentRate) FROM APPTDETAIL_ilw AD, TREATMENT_ilw T WHERE T.TreatmentCode = AD.TreatmentCode GROUP BY ApptID) ;
+
+    APPTID Trea TreatDesc                 BLOCKCODE  BlockCodeD    Minutes       Rate
+---------- ---- ------------------------- ---------- ---------- ---------- ----------
+       112 CI2  Cortizone Injection 2     L1         Level 1            15        100
+       114 PSF  Post-Surgery Follow Up    L1         Level 1            15         30
+       108 GBP  General Back Pain         L2         Level 2            20         60
+       105 GBP  General Back Pain         L2         Level 2            20         60
+       109 SR   Suture Removal            L2         Level 2            20         50
+       101 XR   X-Ray                     L2         Level 2            20        250
+       103 SR   Suture Removal            L2         Level 2            20         50
+       111 XR   X-Ray                     L2         Level 2            20        250
+       102 SR   Suture Removal            L2         Level 2            20         50
+       107 PT30 Physical Therapy 30       L3         Level 3            30         60
+       104 PT30 Physical Therapy 30       L3         Level 3            30         60
+
+    APPTID Trea TreatDesc                 BLOCKCODE  BlockCodeD    Minutes       Rate
+---------- ---- ------------------------- ---------- ---------- ---------- ----------
+       113 PT60 Physical Therapy 60       L4         Level 4            60        110
+       110 PT60 Physical Therapy 60       L4         Level 4            60        110
+       106 PT60 Physical Therapy 60       L4         Level 4            60        110
+
+14 rows selected. 
+
+SQL> 
+SQL> --5
+SQL> SELECT A.ApptID, T.TreatmentDesc as "Treatment", TO_CHAR(T.TreatmentRate, '$9999.99') as "Rate"
+  2  FROM APPTDETAIL_ilw A 
+  3  JOIN TREATMENT_ilw T 
+  4  ON A.TreatmentCode = T.TreatmentCode 
+  5  WHERE ApptID = 111 and T.TreatmentRate = (SELECT MAX(TreatmentRate) from TREATMENT_ilw T, APPTDETAIL_ilw A WHERE T.TreatmentCode = A.TreatmentCode AND ApptID = 111);
+
+    APPTID Treatment                 Rate     
+---------- ------------------------- ---------
+       111 X-Ray                       $250.00
+
+SQL> 
+SQL> --6
+SQL> SELECT B.BlockCode, BlockDesc as "Description", BlockMinutes as "Minutes", COUNT(TreatmentCode) as "TreatmentCount"
+  2  FROM BLOCKCODE_ilw B, TREATMENT_ilw T
+  3  WHERE B.BlockCode = T.BlockCode
+  4  GROUP BY B.BlockCode, BlockDesc, BlockMinutes
+  5  ORDER BY "TreatmentCount" DESC;
+
+BLOCKCODE  Descriptio    Minutes TreatmentCount
+---------- ---------- ---------- --------------
+L2         Level 2            20              5
+L1         Level 1            15              4
+L3         Level 3            30              1
+L4         Level 4            60              1
+
+SQL> 
+SQL> --7
+SQL> SELECT P.ProvID as "Provider ID", ProviderFName as "First Name", ProviderLName as "Last Name", COUNT(ApptID) as "Appt Count"
+  2  FROM APPOINTMENT_ilw A, PROVIDER_ilw P
+  3  WHERE P.ProvID = A.ProvID
+  4  GROUP BY P.ProvID, ProviderFName, ProviderLName
+  5  ORDER BY "Appt Count" DESC;
+
+Provider ID First Name      Last Name       Appt Count
+----------- --------------- --------------- ----------
+          2 Michael         Smith                    6
+          3 Ray             Schultz                  4
+          5 Janice          May                      3
+          1 Kay             Jones                    1
+
+SQL> 
+SQL> --8
+SQL> SELECT PA.PatientID as "Patient ID", PatientLName as "Last Name", ApptID as "Appt ID", TO_CHAR(ApptDateTime, 'MM/DD/YYYY') as "Appt Date", ProviderLName as "Provider"
+  2  FROM PATIENT_ilw PA, APPOINTMENT_ilw A, PROVIDER_ilw PR
+  3  WHERE PA.PatientID = A.PatientID AND A.ProvID = PR.ProvID
+  4  ORDER BY "Patient ID" ASC;
+
+Patient ID Last Name          Appt ID Appt Date  Provider       
+---------- --------------- ---------- ---------- ---------------
+        15 Miner                  103 02/19/2024 Smith          
+        15 Miner                  114 02/21/2024 Smith          
+        23 Davis                  111 02/20/2024 May            
+        28 Walker                 107 02/19/2024 Schultz        
+        77 Jackson                104 02/19/2024 Jones          
+        84 Clayton                110 02/20/2024 Schultz        
+        84 Clayton                109 02/19/2024 May            
+        97 Mancha                 106 02/19/2024 Schultz        
+       100 Rhodes                 102 02/19/2024 May            
+       101 Tanner                 101 02/19/2024 Smith          
+       105 Redmond                108 02/21/2024 Smith          
+
+Patient ID Last Name          Appt ID Appt Date  Provider       
+---------- --------------- ---------- ---------- ---------------
+       105 Redmond                113 02/21/2024 Schultz        
+       119 Vaughn                 105 02/19/2024 Smith          
+       120 Green                  112 02/21/2024 Smith          
+
+14 rows selected. 
+
+SQL> 
+SQL> --9
+SQL> SELECT AD.ApptID, TO_CHAR(ApptDateTime, 'MM/DD/YY, HH:MIAM') as "Date/Time", COUNT(T.TreatmentCode) as "TreatmentCount", TO_CHAR(SUM(TreatmentRate), '$9999.99') as "TotalCharge"
+  2  FROM TREATMENT_ilw T
+  3  JOIN APPTDETAIL_ilw AD
+  4  ON AD.TreatmentCode = T.TreatmentCode
+  5  JOIN APPOINTMENT_ilw a
+  6  ON A.ApptID = AD.ApptID
+  7  GROUP BY AD.ApptID, ApptDateTime
+  8  ORDER BY "TotalCharge" DESC, ApptID DESC;
+
+    APPTID Date/Time         TreatmentCount TotalChar
+---------- ----------------- -------------- ---------
+       111 02/20/24, 08:30AM              3   $355.00
+       101 02/19/24, 09:00AM              3   $355.00
+       112 02/21/24, 09:00AM              3   $205.00
+       113 02/21/24, 10:00AM              1   $110.00
+       110 02/20/24, 08:30AM              1   $110.00
+       106 02/19/24, 10:30AM              1   $110.00
+       105 02/19/24, 10:30AM              2   $105.00
+       109 02/19/24, 02:00PM              2    $80.00
+       103 02/19/24, 10:00AM              2    $80.00
+       102 02/19/24, 09:00AM              2    $80.00
+       108 02/21/24, 11:30AM              1    $60.00
+
+    APPTID Date/Time         TreatmentCount TotalChar
+---------- ----------------- -------------- ---------
+       107 02/19/24, 11:30AM              1    $60.00
+       104 02/19/24, 10:30AM              1    $60.00
+       114 02/21/24, 10:00AM              1    $30.00
+
+14 rows selected. 
+
+SQL> 
+SQL> --10
+SQL> SELECT T.TreatmentCode, T.TreatmentDesc as "Description", COUNT(A.ApptID) as "ApptCount"
+  2  FROM TREATMENT_ilw T
+  3  LEFT OUTER JOIN APPTDETAIL_ilw A
+  4  ON T.TreatmentCode = A.TreatmentCode
+  5  GROUP BY T.TreatmentCode, T.TreatmentDesc;
+
+TREATMENTCODE  Description                ApptCount
+-------------- ------------------------- ----------
+XR             X-Ray                              2
+NP             New Patient                        4
+GBP            General Back Pain                  3
+SR             Suture Removal                     3
+PT30           Physical Therapy 30                2
+PSF            Post-Surgery Follow Up             4
+HP             Hip Pain                           2
+PT60           Physical Therapy 60                3
+CI2            Cortizone Injection 2              1
+CI1            Cortisone Injection 1              0
+BI             Back Injury                        0
+
+11 rows selected. 
+
+SQL> 
+SQL> --11
+SQL> SELECT P.ProvID as "Provider ID", ProviderFName ||' '|| ProviderLName as "Name", TO_CHAR(SUM(T.TreatmentRate), '$9999.99') as "Total Charge"
+  2  FROM PROVIDER_ilw P
+  3  JOIN APPOINTMENT_ilw A
+  4  ON P.ProvID = A.ProvID
+  5  JOIN APPTDETAIL_ilw AD
+  6  ON A.ApptID = AD.ApptID
+  7  JOIN TREATMENT_ilw T
+  8  ON AD.TreatmentCode = T.TreatmentCode
+  9  GROUP BY P.ProvID, ProviderFName, ProviderLName
+ 10  ORDER BY "Total Charge" DESC;
+
+Provider ID Name                            Total Cha
+----------- ------------------------------- ---------
+          2 Michael Smith                     $835.00
+          5 Janice May                        $515.00
+          3 Ray Schultz                       $390.00
+          1 Kay Jones                          $60.00
+
+SQL> 
+SQL> --12
+SQL> SELECT ApptID as "Appt ID", TO_CHAR(ApptDateTime, 'MM/DD/YY, HH:MIAM') as "Date/Time", TO_CHAR(SUM(T.TreatmentRate), '$9999.99') as "Amt Paid"
+  2  FROM (SELECT ApptID as "Appt ID", ApptDateTime FROM APPOINTMENT_ilw A WHERE PmtStatus = 'PD') 
+  3  JOIN APPTDETAIL_ilw AD
+  4  ON "Appt ID" = AD.ApptID
+  5  JOIN TREATMENT_ilw T
+  6  ON AD.TreatmentCode = T.TreatmentCode
+  7  GROUP BY ApptID, ApptDateTime
+  8  ORDER BY "Amt Paid" DESC;
+
+   Appt ID Date/Time         Amt Paid 
+---------- ----------------- ---------
+       101 02/19/24, 09:00AM   $355.00
+       103 02/19/24, 10:00AM    $80.00
+       104 02/19/24, 10:30AM    $60.00
+       107 02/19/24, 11:30AM    $60.00
+
+SQL> 
+SQL> --13
+SQL> SELECT CONCAT(TO_CHAR(COUNT(A2.InsCoID)/COUNT(A1.InsCoID) * 100, 'fm990D0'), '%')  as "Percent with Insurance"
+  2  FROM APPOINTMENT_ilw A1, APPOINTMENT_ilw A2
+  3  WHERE A1.InsCoID IS NOT NULL;
+
+Percent
+-------
+71.4%
+
+SQL> 
+SQL> --14
+SQL> SELECT TO_CHAR(AVG(TreatmentRate), '$9999.99') as "Avg_Rate"
+  2  FROM TREATMENT_ilw;
+
+Avg_Rate 
+---------
+   $79.55
+
+SQL> 
+SQL> --15
+SQL> SELECT A.ApptID, TO_CHAR(ApptDateTime, 'MM/DD/YY, HH:MIAM') as "Date", PatientLName as "Patient", CONCAT(BlockMinutes, ' Minutes') as "Duration"
+  2  FROM APPOINTMENT_ilw A
+  3  JOIN PATIENT_ilw P
+  4  ON A.PatientID = P.PatientID
+  5  JOIN APPTDETAIL_ilw AD
+  6  ON A.ApptID = AD.ApptID
+  7  JOIN TREATMENT_ilw T
+  8  ON AD.TreatmentCode = T.TreatmentCode
+  9  JOIN BLOCKCODE_ilw B
+ 10  ON T.BlockCode = B.BlockCode;
+
+    APPTID Date              Patient         Duration                                        
+---------- ----------------- --------------- ------------------------------------------------
+       101 02/19/24, 09:00AM Tanner          20 Minutes                                      
+       101 02/19/24, 09:00AM Tanner          15 Minutes                                      
+       101 02/19/24, 09:00AM Tanner          20 Minutes                                      
+       102 02/19/24, 09:00AM Rhodes          15 Minutes                                      
+       102 02/19/24, 09:00AM Rhodes          20 Minutes                                      
+       103 02/19/24, 10:00AM Miner           15 Minutes                                      
+       103 02/19/24, 10:00AM Miner           20 Minutes                                      
+       114 02/21/24, 10:00AM Miner           15 Minutes                                      
+       104 02/19/24, 10:30AM Jackson         30 Minutes                                      
+       105 02/19/24, 10:30AM Vaughn          20 Minutes                                      
+       105 02/19/24, 10:30AM Vaughn          15 Minutes                                      
+
+    APPTID Date              Patient         Duration                                        
+---------- ----------------- --------------- ------------------------------------------------
+       106 02/19/24, 10:30AM Mancha          60 Minutes                                      
+       107 02/19/24, 11:30AM Walker          30 Minutes                                      
+       108 02/21/24, 11:30AM Redmond         20 Minutes                                      
+       113 02/21/24, 10:00AM Redmond         60 Minutes                                      
+       109 02/19/24, 02:00PM Clayton         15 Minutes                                      
+       109 02/19/24, 02:00PM Clayton         20 Minutes                                      
+       110 02/20/24, 08:30AM Clayton         60 Minutes                                      
+       111 02/20/24, 08:30AM Davis           20 Minutes                                      
+       111 02/20/24, 08:30AM Davis           15 Minutes                                      
+       111 02/20/24, 08:30AM Davis           20 Minutes                                      
+       112 02/21/24, 09:00AM Green           15 Minutes                                      
+
+    APPTID Date              Patient         Duration                                        
+---------- ----------------- --------------- ------------------------------------------------
+       112 02/21/24, 09:00AM Green           20 Minutes                                      
+       112 02/21/24, 09:00AM Green           15 Minutes                                      
+
+24 rows selected. 
+
+SQL> 
+SQL> --16
+SQL> SELECT ApptID, T.TreatmentCode, TreatmentDesc as "Description", BlockMinutes as "Minutes", TO_CHAR(MIN(TreatmentRate), '$9999.99') as "Rate"
+  2  FROM APPTDETAIL_ilw A, TREATMENT_ilw T, BLOCKCODE_ilw B
+  3  WHERE A.TreatmentCode = T.TreatmentCode AND T.BlockCode = B.BlockCode
+  4  GROUP BY ApptID, T.TreatmentCode, TreatmentDesc, BlockMinutes;
+
+    APPTID TREATMENTCODE  Description                  Minutes Rate     
+---------- -------------- ------------------------- ---------- ---------
+       104 PT30           Physical Therapy 30               30    $60.00
+       109 SR             Suture Removal                    20    $50.00
+       101 GBP            General Back Pain                 20    $60.00
+       102 PSF            Post-Surgery Follow Up            15    $30.00
+       111 XR             X-Ray                             20   $250.00
+       105 GBP            General Back Pain                 20    $60.00
+       106 PT60           Physical Therapy 60               60   $110.00
+       107 PT30           Physical Therapy 30               30    $60.00
+       108 GBP            General Back Pain                 20    $60.00
+       112 NP             New Patient                       15    $45.00
+       103 SR             Suture Removal                    20    $50.00
+
+    APPTID TREATMENTCODE  Description                  Minutes Rate     
+---------- -------------- ------------------------- ---------- ---------
+       105 NP             New Patient                       15    $45.00
+       111 HP             Hip Pain                          20    $60.00
+       112 HP             Hip Pain                          20    $60.00
+       103 PSF            Post-Surgery Follow Up            15    $30.00
+       109 PSF            Post-Surgery Follow Up            15    $30.00
+       113 PT60           Physical Therapy 60               60   $110.00
+       114 PSF            Post-Surgery Follow Up            15    $30.00
+       101 NP             New Patient                       15    $45.00
+       101 XR             X-Ray                             20   $250.00
+       102 SR             Suture Removal                    20    $50.00
+       111 NP             New Patient                       15    $45.00
+
+    APPTID TREATMENTCODE  Description                  Minutes Rate     
+---------- -------------- ------------------------- ---------- ---------
+       112 CI2            Cortizone Injection 2             15   $100.00
+       110 PT60           Physical Therapy 60               60   $110.00
+
+24 rows selected. 
+
+SQL> 
+SQL> --17
+SQL> SELECT TreatmentCode as "Treatment Code", TreatmentDesc as "Description", BlockMinutes as "Minutes", TO_CHAR(TreatmentRate, '$9999.99') as "Rate"
+  2  FROM TREATMENT_ilw T, BLOCKCODE_ilw B
+  3  WHERE T.BlockCode = B.BlockCode AND TreatmentRate > (SELECT AVG(TreatmentRate) FROM TREATMENT_ilw);
+
+Trea Description                  Minutes Rate     
+---- ------------------------- ---------- ---------
+XR   X-Ray                             20   $250.00
+PT60 Physical Therapy 60               60   $110.00
+CI2  Cortizone Injection 2             15   $100.00
+
+SQL> 
+SQL> --18 
+SQL> SELECT ApptID, TO_CHAR(ApptDateTime, 'MM/DD/YYYY') as "Date", A.PatientID, PatientLName as "Name", PatientPhone as "Phone"
+  2  FROM APPOINTMENT_ilw A, PATIENT_ilw P
+  3  WHERE A.PatientID = P.PatientID AND ApptDateTime < '02/20/2024';
+
+    APPTID Date        PATIENTID Name            Phone     
+---------- ---------- ---------- --------------- ----------
+       101 02/19/2024        101 Tanner          8175551193
+       102 02/19/2024        100 Rhodes          2145551234
+       103 02/19/2024         15 Miner           8175558918
+       104 02/19/2024         77 Jackson         8175554911
+       105 02/19/2024        119 Vaughn          8175552334
+       106 02/19/2024         97 Mancha          4695553440
+       107 02/19/2024         28 Walker          2145559285
+       109 02/19/2024         84 Clayton         2145559285
+
+8 rows selected. 
+
+SQL> 
+SQL> --19
+SQL> SELECT PatientID, PatientFName as "First Name", PatientLName as "Last Name", SUBSTR(PatientPhone,1,3) ||'-'|| SUBSTR(PatientPhone,4,3) ||'-'|| SUBSTR(PatientPhone,7,4) as "Phone"
+  2  FROM PATIENT_ilw 
+  3  WHERE PatientFName like 'J%' or PatientLName like 'J%'
+  4  ORDER BY PatientID;
+
+ PATIENTID First Name      Last Name       Phone       
+---------- --------------- --------------- ------------
+        15 Jeff            Miner           817-555-8918
+        77 Kim             Jackson         817-555-4911
+        84 James           Clayton         214-555-9285
+       105 Johnny          Redmond         214-555-1084
+
+SQL> 
+SQL> --20
+SQL> SELECT A.ApptStatusCode as "Status Code", ApptStatusDesc as "Description", COUNT(ApptID) as "Appt Count"
+  2  FROM APPTSTATUS_ilw APS, APPOINTMENT_ilw A
+  3  WHERE APS.ApptStatusCode = A.ApptStatusCode
+  4  GROUP BY A.ApptStatusCode, ApptStatusDesc
+  5  ORDER BY "Appt Count" DESC;
+
+St Description     Appt Count
+-- --------------- ----------
+CM Complete                 7
+NC Not Confirmed            5
+CN Confirmed                2
+
